@@ -43,7 +43,7 @@ def validate_phone(phone: str) -> bool:
         return False
     
     # Acc to international standards: 7 to 15 digits
-    is_valid = 7 <= len(digits) >= 15
+    is_valid = 7 <= len(digits) <= 15
 
     if not is_valid:
         logger.warning(f"Invalid phone attempt: {phone}")
