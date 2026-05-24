@@ -1,10 +1,7 @@
 import sqlite3
 import os
 import csv
-try:
-    from core.logger import logger 
-except ImportError:
-    from logger import logger  
+from core.logger import logger 
 from datetime import datetime
 
 DB_FILE = "Database.db"

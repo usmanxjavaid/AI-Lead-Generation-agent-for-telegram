@@ -1,8 +1,6 @@
 import re
-try:
-    from core.logger import logger  # works when called from bot.py
-except ImportError:
-    from logger import logger       # works when running directly
+from core.logger import logger 
+
 
 def validate_email(email: str) -> bool:
     """
