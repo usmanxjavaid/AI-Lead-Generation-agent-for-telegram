@@ -4,3 +4,5 @@ __pycache__/
 database.db
 *.pyc
 .git/
+logs/
+exports/
