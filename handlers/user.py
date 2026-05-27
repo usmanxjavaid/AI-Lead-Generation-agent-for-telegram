@@ -34,8 +34,12 @@ def get_user_data(context) -> dict:
 def get_service_keyboard() -> InlineKeyboardMarkup:
     """Builds service selection buttons from config"""
     keyboard = []
-    for service in Config.SERVICES:
-        keyboard.append([InlineKeyboardButton(service, callback_data=f"service_{service}")])
+    for i, service in enumerate(Config.SERVICES):
+        # Use index number instead of full service name
+        # "service_0" instead of "service_Web Development"
+        keyboard.append([
+            InlineKeyboardButton(service, callback_data=f"svc_{i}")
+        ])
     return InlineKeyboardMarkup(keyboard)
 
 #  ──── /start handler ────────────────────────────────────────
@@ -65,20 +69,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
     text = update.effective_message.text.strip()
+
+    await context.bot.send_chat_action(
+    chat_id=update.effective_chat.id,
+    action="typing"
+    )
+    
     lead = get_user_data(context)
     state = lead['state']
 
     # Route to correct handler based on current state
     if state == WAITING_NAME:
-        await handle_name(update, context, lead, state)
+        await handle_name(update, context, lead, text)
     elif state == WAITING_EMAIL:
-        await handle_email(update, context, lead, state)
+        await handle_email(update, context, lead, text)
     elif state == WAITING_PHONE:
-        await handle_phone(update, context, lead, state)
-    elif state == WAITING_SERVICE:
-        await handler_service(update, context, lead, state)
+        await handle_phone(update, context, lead, text)
     elif state == WAITING_REQUIREMENT:
-        await handle_requirement(update, context, lead, state)
+        await handle_requirement(update, context, lead, text)
     elif state == DONE:
         await update.message.reply_text(
             "✅ We already have your details!\n\n"
@@ -88,7 +96,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 # ──── Individual step handlers ──────────────────────────────
 
-async def handle_name(update, context, lead, state):
+async def handle_name(update, context, lead, text):
     if not validate_name(text):
         await update.message.reply_text(
             "❌ Please enter a valid name.\n"
@@ -124,9 +132,9 @@ async def handle_email(update, context, lead, text):
     logger.info(f"Email collected: {text}")
 
     await update.message.reply_text(
-        "Got it!📧\n\n"
+        "Got it! 📧\n\n"
         "What's your *phone number*?\n"
-        "Include country code before phone number" 
+        "Include country code before phone number.\n" 
         "Example: *+1-800-555-0199* or *+44 7911 123456*",
         parse_mode='Markdown'
     )
@@ -203,21 +211,28 @@ async def handle_requirement(update, context, lead, text):
 
 # ──── Button handler ────────────────────────────────────────
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    query = update.callback_query()
+    query = update.callback_query
     await query.answer()
+
+    # If it's an admin button, ignore it here
+    # It will be handled in admin button handler
+    if query.data.startswith("admin_"):
+        return
 
     lead = get_user_data(context)
 
     # Handle service selection
-    if query.data.startswith("service_"):
+    if query.data.startswith("svc_"):
         if lead['state'] != WAITING_SERVICE:
             await query.answer("Please follow the steps from /start")
             return
         
-    # Extract service name from callback data
-    service = query.data.replace("service", "")
+    # Get service name using index from config
+    index = int(query.data.replace("svc_", ""))
+    service = Config.SERVICES[index]
+    
     lead["service"] = service
-    lead["state"] = WAITING_SERVICE
+    lead["state"] = WAITING_REQUIREMENT
 
     logger.info(f"Service selected: {service}")
 
@@ -242,7 +257,7 @@ async def notify_admin(context, lead: dict, user_id: int):
             f"🆔 Telegram ID: `{user_id}`"
         )
 
-        await context.bot.send(
+        await context.bot.send_message(
             chat_id=Config.ADMIN_ID,
             text=message,
             parse_mode="Markdown"
@@ -253,4 +268,3 @@ async def notify_admin(context, lead: dict, user_id: int):
     except Exception as e:
         logger.error(f"Failed to notify admin: {e}")
 
-    
