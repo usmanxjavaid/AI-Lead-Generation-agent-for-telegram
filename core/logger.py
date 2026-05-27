@@ -19,4 +19,6 @@ def setup_logger():
 
     return logging.getLogger(__name__)
 
+# Suppress httpx logs 
+logging.getLogger("httpx").setLevel(logging.WARNING)
 logger = setup_logger()

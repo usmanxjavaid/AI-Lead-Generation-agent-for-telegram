@@ -16,10 +16,10 @@ class Config:
     COMPANY_NAME = "TechAura"
     AGENT_NAME = "BookEase AI Agent"
     SERVICES = [
-        "Web Development"
-        "Mobile App"
-        "AI Agent Development"
-        "AI Chatbot"
+        "Web Development",
+        "Mobile App",
+        "AI Agent Development",
+        "AI Chatbot",
         "Other"
     ]
     FOLLOWUP_HOURS = 24
