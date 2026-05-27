@@ -227,21 +227,21 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await query.answer("Please follow the steps from /start")
             return
         
-    # Get service name using index from config
-    index = int(query.data.replace("svc_", ""))
-    service = Config.SERVICES[index]
-    
-    lead["service"] = service
-    lead["state"] = WAITING_REQUIREMENT
+        # Get service name using index from config
+        index = int(query.data.replace("svc_", ""))
+        service = Config.SERVICES[index]
+        
+        lead["service"] = service
+        lead["state"] = WAITING_REQUIREMENT
 
-    logger.info(f"Service selected: {service}")
+        logger.info(f"Service selected: {service}")
 
-    await query.edit_message_text(
-        f"Great choice! You selected *{service}* 👍\n\n"
-        "Please *briefly describe* your requirement. \n"
-        "The more details you give, the better we can help:",
-        parse_mode='Markdown'
-    )
+        await query.edit_message_text(
+            f"Great choice! You selected *{service}* 👍\n\n"
+            "Please *briefly describe* your requirement. \n"
+            "The more details you give, the better we can help:",
+            parse_mode='Markdown'
+        )
 
 # ──── Admin notification ────────────────────────────────────
 async def notify_admin(context, lead: dict, user_id: int):
