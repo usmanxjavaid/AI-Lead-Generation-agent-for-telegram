@@ -88,12 +88,25 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif state == WAITING_REQUIREMENT:
         await handle_requirement(update, context, lead, text)
     elif state == DONE:
-        await update.message.reply_text(
-            "✅ We already have your details!\n\n"
-            "Our team will contact your soon.\n"
-            "Type /start to submit a new request"
-        )    
+    # Use AI to respond after lead is collected
+    from core.ai import get_ai_reply
+    context_info = "Lead already collected from this user"
+    reply = get_ai_reply(user_message, context_info)
+    await update.message.reply_text(
+        reply + "\n\n_Type /start to submit a new request._",
+        parse_mode="Markdown"
+    )
 
+    else:
+        # User typed something unexpected during flow
+        # Use AI to respond intelligently
+        from core.ai import get_ai_reply
+        context_info = f"User is at state: {state}"
+        reply = get_ai_reply(user_message, context_info)
+        await update.message.reply_text(
+            reply + "\n\n_Type /start to begin._",
+            parse_mode="Markdown"
+        )
 # ──── Individual step handlers ──────────────────────────────
 
 async def handle_name(update, context, lead, text):
