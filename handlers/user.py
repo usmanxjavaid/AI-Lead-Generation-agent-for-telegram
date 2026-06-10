@@ -88,13 +88,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif state == WAITING_REQUIREMENT:
         await handle_requirement(update, context, lead, text)
     elif state == DONE:
-    # Use AI to respond after lead is collected
-    from core.ai import get_ai_reply
-    context_info = "Lead already collected from this user"
-    reply = get_ai_reply(user_message, context_info)
-    await update.message.reply_text(
-        reply + "\n\n_Type /start to submit a new request._",
-        parse_mode="Markdown"
+        # Use AI to respond after lead is collected
+        from core.ai import get_ai_reply
+        context_info = "Lead already collected from this user"
+        reply = get_ai_reply(user_message, context_info)
+        await update.message.reply_text(
+            reply + "\n\n_Type /start to submit a new request._",
+            parse_mode="Markdown"
     )
 
     else:
